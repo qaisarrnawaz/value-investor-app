@@ -7,3 +7,7 @@ vite.config.ts.*
 attached_assets
 *.env
 .env
+.github/
+.local/
+.npm-cache/
+attached_assets/
