@@ -27,6 +27,8 @@ import {
   Cell,
 } from "recharts";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+
 interface SearchResult {
   ticker: string;
   name: string;
@@ -66,6 +68,13 @@ const featureCards = [
     iconColor: "text-purple-600",
     title: "Financial Charts",
     description: "Visualize 5-year revenue, profit, and DCF trends",
+  },
+  {
+    icon: TrendingUp,
+    iconBg: "bg-green-100",
+    iconColor: "text-green-600",
+    title: "Revenue Treemap",
+    description: "See product segment breakdown and growth rates",
   },
 ];
 
@@ -169,7 +178,7 @@ export const StockResearchApp = (): JSX.Element => {
     queryKey: ["stocks", "search", debouncedQuery],
     queryFn: async () => {
       if (!debouncedQuery || debouncedQuery.length < 2) return null;
-      const response = await fetch(`/api/stocks/search?q=${encodeURIComponent(debouncedQuery)}`);
+      const response = await fetch(`${API_BASE}/api/stocks/search?q=${encodeURIComponent(debouncedQuery)}`);
       if (!response.ok) throw new Error("Failed to search stocks");
       return response.json();
     },
@@ -179,7 +188,7 @@ export const StockResearchApp = (): JSX.Element => {
   const { data: stockDetails } = useQuery({
     queryKey: ["stocks", selectedTicker, "details"],
     queryFn: async () => {
-      const response = await fetch(`/api/stocks/${selectedTicker}/details`);
+      const response = await fetch(`${API_BASE}/api/stocks/${selectedTicker}/details`);
       if (!response.ok) throw new Error("Failed to fetch stock details");
       return response.json();
     },
@@ -189,7 +198,7 @@ export const StockResearchApp = (): JSX.Element => {
   const { data: previousDay } = useQuery({
     queryKey: ["stocks", selectedTicker, "previous"],
     queryFn: async () => {
-      const response = await fetch(`/api/stocks/${selectedTicker}/previous`);
+      const response = await fetch(`${API_BASE}/api/stocks/${selectedTicker}/previous`);
       if (!response.ok) throw new Error("Failed to fetch previous day data");
       return response.json();
     },
@@ -199,7 +208,7 @@ export const StockResearchApp = (): JSX.Element => {
   const { data: financials, isLoading: isLoadingFinancials } = useQuery({
     queryKey: ["stocks", selectedTicker, "financials"],
     queryFn: async () => {
-      const response = await fetch(`/api/stocks/${selectedTicker}/financials/income?timeframe=annual&limit=5`);
+      const response = await fetch(`${API_BASE}/api/stocks/${selectedTicker}/financials/income?timeframe=annual&limit=5`);
       if (!response.ok) throw new Error("Failed to fetch financials");
       return response.json();
     },

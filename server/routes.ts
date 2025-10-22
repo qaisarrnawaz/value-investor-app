@@ -11,6 +11,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     throw new Error("POLYGON_API_KEY environment variable is required but not set");
   }
 
+  const authHeaders = {
+    Authorization: `Bearer ${POLYGON_API_KEY}`,
+    "X-Polygon-API-Key": String(POLYGON_API_KEY),
+  } as const;
+
+  async function polygonFetch(pathWithQuery: string) {
+    const url = `${POLYGON_BASE_URL}${pathWithQuery}`;
+    const response = await fetch(url, { headers: authHeaders });
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Polygon API error: ${response.statusText}`);
+    }
+    return response;
+  }
+
   // Search for companies by ticker or name
   app.get("/api/stocks/search", async (req, res) => {
     try {
@@ -19,8 +34,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Query parameter 'q' is required" });
       }
 
-      const response = await fetch(
-        `${POLYGON_BASE_URL}/v3/reference/tickers?search=${encodeURIComponent(query)}&active=true&limit=10&apiKey=${POLYGON_API_KEY}`
+      const response = await polygonFetch(
+        `/v3/reference/tickers?search=${encodeURIComponent(query)}&active=true&limit=10`,
       );
 
       if (!response.ok) {
@@ -40,8 +55,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { ticker } = req.params;
       const encodedTicker = encodeURIComponent(ticker);
 
-      const response = await fetch(
-        `${POLYGON_BASE_URL}/v3/reference/tickers/${encodedTicker}?apiKey=${POLYGON_API_KEY}`
+      const response = await polygonFetch(
+        `/v3/reference/tickers/${encodedTicker}`,
       );
 
       if (!response.ok) {
@@ -63,8 +78,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const timeframe = req.query.timeframe || "annual";
       const limit = req.query.limit || 5;
 
-      const response = await fetch(
-        `${POLYGON_BASE_URL}/vX/reference/financials?ticker=${encodedTicker}&timeframe=${timeframe}&limit=${limit}&apiKey=${POLYGON_API_KEY}`
+      const response = await polygonFetch(
+        `/vX/reference/financials?ticker=${encodedTicker}&timeframe=${timeframe}&limit=${limit}`,
       );
 
       if (!response.ok) {
@@ -89,8 +104,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "from and to date parameters are required (YYYY-MM-DD)" });
       }
 
-      const response = await fetch(
-        `${POLYGON_BASE_URL}/v2/aggs/ticker/${encodedTicker}/range/${multiplier}/${timespan}/${from}/${to}?adjusted=true&sort=asc&apiKey=${POLYGON_API_KEY}`
+      const response = await polygonFetch(
+        `/v2/aggs/ticker/${encodedTicker}/range/${multiplier}/${timespan}/${from}/${to}?adjusted=true&sort=asc`,
       );
 
       if (!response.ok) {
@@ -110,8 +125,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { ticker } = req.params;
       const encodedTicker = encodeURIComponent(ticker);
 
-      const response = await fetch(
-        `${POLYGON_BASE_URL}/v2/aggs/ticker/${encodedTicker}/prev?adjusted=true&apiKey=${POLYGON_API_KEY}`
+      const response = await polygonFetch(
+        `/v2/aggs/ticker/${encodedTicker}/prev?adjusted=true`,
       );
 
       if (!response.ok) {
