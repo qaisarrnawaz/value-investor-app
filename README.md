@@ -14,7 +14,7 @@ Preferred communication style: Simple, everyday language.
 
 **Technology Stack:**
 - React 18 with TypeScript for type-safe component development
-- Vite as the build tool and development server for fast HMR (Hot Module Replacement)
+- Vite as the build tool and development server for fast HMR
 - Wouter for lightweight client-side routing
 - TanStack Query (React Query) for server state management and data fetching
 - Recharts for financial data visualization (charts and graphs)
